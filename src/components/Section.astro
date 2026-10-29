@@ -1,0 +1,25 @@
+---
+// Swiss-style section: small label column on the left from md up, content on the right.
+interface Props {
+  id: string;
+  title: string;
+}
+
+const { id, title } = Astro.props;
+---
+
+<section
+  id={id}
+  aria-labelledby={`${id}-title`}
+  class="reveal grid scroll-mt-20 gap-6 border-t border-border py-14 sm:py-16 md:grid-cols-[11rem_1fr] md:gap-10"
+>
+  <h2
+    id={`${id}-title`}
+    class="text-sm font-semibold tracking-[0.12em] text-muted-foreground uppercase"
+  >
+    {title}
+  </h2>
+  <div class="min-w-0">
+    <slot />
+  </div>
+</section>

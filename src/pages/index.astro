@@ -1,0 +1,355 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Icon from '../components/Icon.astro';
+import Todo from '../components/Todo.astro';
+import {
+  profile,
+  about,
+  projects,
+  experience,
+  research,
+  skillGroups,
+  hackathon,
+  education,
+} from '../data/site';
+
+// Files in public/ that may not be there yet; show a placeholder instead of a broken link or image.
+const inPublic = (path: string) => existsSync(join(process.cwd(), 'public', path));
+const hasPhoto = inPublic('photo.jpg');
+const hasResume = inPublic(profile.links.resume);
+const hasCertificate = inPublic(research.certificate);
+
+const btn =
+  'inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-4 text-sm font-medium transition-colors duration-200';
+const btnPrimary = `${btn} bg-accent text-on-accent hover:bg-accent-hover`;
+const btnSecondary = `${btn} border border-border bg-card hover:border-muted-foreground/60`;
+const link =
+  'inline-flex items-center gap-1 font-medium text-accent underline-offset-4 transition-colors duration-200 hover:underline';
+---
+
+<Base
+  title={`${profile.name} · ${profile.role}`}
+  description={`${profile.name}, ${profile.role}. ${profile.valueStatement}`}
+>
+  <!-- Hero -->
+  <section id="top" aria-labelledby="hero-title" class="py-16 sm:py-24">
+    <div class="flex flex-col-reverse gap-10 md:flex-row md:items-center md:justify-between">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          {profile.role}
+        </p>
+        <h1 id="hero-title" class="mt-3 text-4xl font-bold tracking-tight text-balance sm:text-6xl">
+          {profile.name}
+        </h1>
+        <p class="mt-5 text-lg text-pretty text-muted-foreground sm:text-xl">
+          {profile.valueStatement}
+        </p>
+
+        <ul class="mt-8 flex flex-wrap gap-3" aria-label="Links">
+          <li>
+            {
+              hasResume ? (
+                <a href={profile.links.resume} class={btnPrimary}>
+                  <Icon name="file" />
+                  Resume (PDF)
+                </a>
+              ) : (
+                <Todo label="add public/Logesh_V_Resume.pdf" class="py-2.5" />
+              )
+            }
+          </li>
+          <li>
+            {
+              profile.links.github ? (
+                <a href={profile.links.github} class={btnSecondary}>
+                  <Icon name="github" />
+                  GitHub
+                </a>
+              ) : (
+                <Todo label="GitHub URL" class="py-2.5" />
+              )
+            }
+          </li>
+          <li>
+            <a href={profile.links.linkedin} class={btnSecondary}>
+              <Icon name="linkedin" />
+              LinkedIn
+            </a>
+          </li>
+          <li>
+            {
+              profile.links.email ? (
+                <a href={`mailto:${profile.links.email}`} class={btnSecondary}>
+                  <Icon name="mail" />
+                  Email
+                </a>
+              ) : (
+                <Todo label="personal email" class="py-2.5" />
+              )
+            }
+          </li>
+        </ul>
+      </div>
+
+      {
+        hasPhoto ? (
+          <img
+            src="/photo.jpg"
+            alt={`Portrait of ${profile.name}`}
+            width="176"
+            height="176"
+            class="size-36 shrink-0 rounded-full border border-border object-cover sm:size-44"
+          />
+        ) : (
+          <div class="flex size-36 shrink-0 items-center justify-center rounded-full border border-dashed border-muted-foreground/50 p-4 text-center text-sm text-muted-foreground sm:size-44">
+            [TODO: add public/photo.jpg]
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <Section id="about" title="About">
+    <div class="max-w-2xl space-y-4 text-pretty">
+      {about.map((line) => <p>{line}</p>)}
+    </div>
+  </Section>
+
+  <Section id="projects" title="Featured projects">
+    <ol class="grid gap-6 sm:grid-cols-2">
+      {
+        projects.map((project, i) => (
+          <li class="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
+            {project.screenshot ? (
+              <img
+                src={project.screenshot}
+                alt={`Screenshot of ${project.title}`}
+                width="640"
+                height="400"
+                loading="lazy"
+                class="aspect-[16/10] w-full border-b border-border object-cover"
+              />
+            ) : (
+              <div class="flex aspect-[16/10] items-center justify-center border-b border-border bg-muted/60 p-4 text-center text-sm text-muted-foreground">
+                [TODO: screenshot of {project.title}]
+              </div>
+            )}
+            <div class="flex flex-1 flex-col p-5">
+              <div class="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+                <span class="font-semibold tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                {project.status && (
+                  <span class="rounded-full border border-border px-2.5 py-0.5 text-xs">{project.status}</span>
+                )}
+              </div>
+              <h3 class="mt-2 text-lg font-semibold tracking-tight">{project.title}</h3>
+              <p class="mt-2 text-sm text-pretty text-muted-foreground">{project.summary}</p>
+              <p class="mt-3 text-sm">
+                {project.result ?? <Todo label="one-line result" />}
+              </p>
+              <ul class="mt-4 flex flex-wrap gap-2" aria-label="Tech">
+                {project.tags.map((tag) => (
+                  <li class="rounded bg-muted px-2 py-1 text-xs font-medium">{tag}</li>
+                ))}
+              </ul>
+              <div class="mt-auto pt-5">
+                {project.caseStudy ? (
+                  <a href={project.caseStudy} class={link}>
+                    Read case study
+                    <Icon name="arrow" />
+                  </a>
+                ) : (
+                  <Todo label="case study page" />
+                )}
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <Section id="experience" title="Experience">
+    <ol class="space-y-10">
+      {
+        experience.map((job) => (
+          <li>
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+              <h3 class="font-semibold tracking-tight">
+                {job.role ?? <Todo label="role title" />}
+                <span class="font-normal text-muted-foreground"> · {job.org}</span>
+              </h3>
+              <p class="shrink-0 text-sm text-muted-foreground tabular-nums">
+                {job.dates ?? <Todo label="dates" />}
+              </p>
+            </div>
+            <ul class="mt-3 max-w-2xl list-disc space-y-1.5 pl-5 text-pretty marker:text-muted-foreground">
+              {job.points.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+            {job.link && (
+              <p class="mt-2 text-sm">
+                {job.link.href ? (
+                  <a href={job.link.href} class={link}>
+                    {job.link.label}
+                    <Icon name="arrow" />
+                  </a>
+                ) : (
+                  <Todo label="link to the published benchmark" />
+                )}
+              </p>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <Section id="research" title="Research & publications">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+      <div class="max-w-xl">
+        <h3 class="font-semibold tracking-tight">
+          {research.title ?? <Todo label="paper title" />}
+        </h3>
+        <p class="mt-2 text-pretty text-muted-foreground">
+          Presented at {research.venue}, {research.host}, {research.dates}.
+        </p>
+        <p class="mt-2 text-sm text-muted-foreground">Co-authored with {research.coAuthors}.</p>
+        <p class="mt-3 text-sm">
+          {
+            research.pdf ? (
+              <a href={research.pdf} class={link}>
+                Read the paper (PDF)
+                <Icon name="arrow" />
+              </a>
+            ) : (
+              <Todo label="paper PDF in public/" />
+            )
+          }
+        </p>
+      </div>
+      {
+        hasCertificate ? (
+          <img
+            src={research.certificate}
+            alt={`${research.venue} publication certificate`}
+            width="320"
+            height="226"
+            loading="lazy"
+            class="w-full max-w-xs rounded-md border border-border"
+          />
+        ) : (
+          <div class="flex aspect-[1.414] w-full max-w-xs items-center justify-center rounded-md border border-dashed border-muted-foreground/50 p-4 text-center text-sm text-muted-foreground">
+            [TODO: add public/certificate.jpg]
+          </div>
+        )
+      }
+    </div>
+  </Section>
+
+  <Section id="skills" title="Skills">
+    <div class="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+      {
+        skillGroups.map((group) => (
+          <div>
+            <h3 class="font-semibold tracking-tight">{group.name}</h3>
+            {group.items.length ? (
+              <ul class="mt-3 flex flex-wrap gap-2">
+                {group.items.map((item) => (
+                  <li class="rounded bg-muted px-2 py-1 text-sm">{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p class="mt-3">
+                <Todo label="skills you can defend in an interview" />
+              </p>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section id="hackathons" title="Hackathons">
+    <h3 class="font-semibold tracking-tight">
+      {hackathon.project}
+      <span class="font-normal text-muted-foreground"> · {hackathon.event}</span>
+    </h3>
+    <p class="mt-2 max-w-2xl text-pretty">{hackathon.description}</p>
+    <p class="mt-3 text-sm">
+      {
+        hackathon.video ? (
+          <a href={hackathon.video} class={link}>
+            <Icon name="play" class="size-3.5" />
+            Watch the demo
+          </a>
+        ) : (
+          <Todo label="AgentGuard demo video" />
+        )
+      }
+    </p>
+  </Section>
+
+  <Section id="education" title="Education">
+    <ol class="space-y-6">
+      {
+        education.map((item) => (
+          <li class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+            <div>
+              <h3 class="font-semibold tracking-tight">{item.degree}</h3>
+              <p class="text-muted-foreground">{item.school}</p>
+            </div>
+            <p class="shrink-0 text-sm text-muted-foreground tabular-nums">{item.year}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <footer
+    id="contact"
+    aria-labelledby="contact-title"
+    class="reveal scroll-mt-20 border-t border-border py-14 sm:py-16"
+  >
+    <h2 id="contact-title" class="text-2xl font-bold tracking-tight sm:text-3xl">
+      Get in touch
+    </h2>
+    <p class="mt-3 max-w-xl text-muted-foreground">Open to AI and data analyst roles.</p>
+    <ul class="mt-6 flex flex-wrap gap-3" aria-label="Contact">
+      <li>
+        {
+          profile.links.email ? (
+            <a href={`mailto:${profile.links.email}`} class={btnPrimary}>
+              <Icon name="mail" />
+              {profile.links.email}
+            </a>
+          ) : (
+            <Todo label="personal email" class="py-2.5" />
+          )
+        }
+      </li>
+      <li>
+        <a href={profile.links.linkedin} class={btnSecondary}>
+          <Icon name="linkedin" />
+          LinkedIn
+        </a>
+      </li>
+      <li>
+        {
+          profile.links.github ? (
+            <a href={profile.links.github} class={btnSecondary}>
+              <Icon name="github" />
+              GitHub
+            </a>
+          ) : (
+            <Todo label="GitHub URL" class="py-2.5" />
+          )
+        }
+      </li>
+    </ul>
+    <p class="mt-12 text-sm text-muted-foreground">© 2026 {profile.name}</p>
+  </footer>
+</Base>
